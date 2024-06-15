@@ -849,7 +849,7 @@ const ResizableImage = React.memo(
       <GestureDetector
         gesture={
           item?.type === 'video'
-            ? Gesture.Race(panGesture)
+            ? Gesture.Race(panGesture, tapGesture)
             : Gesture.Race(
                 Gesture.Simultaneous(
                   longPressGesture,
@@ -1005,14 +1005,16 @@ const GalleryComponent = <T extends any>(
       <Animated.View style={[styles.rowContainer, animatedStyle]}>
         {data.map((item: any, i) => {
           const isFirst = i === 0;
-
+          const renderCount =
+            item.type === GalleryItemType.VIDEO ? 1 : numToRender;
           const outOfLoopRenderRange =
             !isLoop ||
-            (Math.abs(i - index) < data.length - (numToRender - 1) / 2 &&
-              Math.abs(i - index) > (numToRender - 1) / 2);
+            (Math.abs(i - index) < data.length - (renderCount - 1) / 2 &&
+              Math.abs(i - index) > (renderCount - 1) / 2);
 
           const hidden =
-            Math.abs(i - index) > (numToRender - 1) / 2 && outOfLoopRenderRange;
+            Math.abs(i - index) > (renderCount - 1) / 2 && outOfLoopRenderRange;
+          console.log(hidden);
 
           return (
             <View
@@ -1074,7 +1076,7 @@ const Gallery = React.forwardRef(GalleryComponent) as <T extends any>(
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
   rowContainer: { flex: 1, flexDirection: 'row' },
-  activeItem: { zIndex: 1 },
+  activeItem: { zIndex: 99 },
   inactiveItem: { zIndex: 0 },
 });
 
