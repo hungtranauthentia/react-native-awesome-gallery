@@ -21,16 +21,19 @@ declare type EventsCallbacks = {
     onPanStart?: () => void;
 };
 declare type RenderItem<T> = (imageInfo: RenderItemInfo<T>) => React.ReactElement | null;
-export declare enum GalleryItemType {
+export declare enum GalleryMediaType {
     VIDEO = "video",
     IMAGE = "image"
 }
+export declare type GalleryItemType = {
+    type: GalleryMediaType;
+};
 export declare type GalleryRef = {
     setIndex: (newIndex: number, animated?: boolean) => void;
     reset: (animated?: boolean) => void;
 };
 export declare type GalleryReactRef = React.Ref<GalleryRef>;
-declare type GalleryProps<T> = EventsCallbacks & {
+declare type GalleryProps<T extends GalleryItemType> = EventsCallbacks & {
     ref?: GalleryReactRef;
     data: T[];
     renderItem?: RenderItem<T>;
@@ -60,7 +63,7 @@ declare type GalleryProps<T> = EventsCallbacks & {
         end: number;
     };
 };
-declare const Gallery: <T extends unknown>(p: EventsCallbacks & {
+declare const Gallery: <T extends GalleryItemType>(p: EventsCallbacks & {
     ref?: GalleryReactRef | undefined;
     data: T[];
     renderItem?: RenderItem<T> | undefined;
