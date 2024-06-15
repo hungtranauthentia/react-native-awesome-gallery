@@ -5934,6 +5934,7 @@ __metadata:
     babel-loader: ^8.1.0
     babel-plugin-module-resolver: ^5.0.0
     expo: ^50.0.15
+    expo-av: ~13.10.6
     expo-image: ~1.10.6
     expo-status-bar: ~1.11.1
     react: 18.2.0
@@ -5997,6 +5998,15 @@ __metadata:
     invariant: ^2.2.4
     md5-file: ^3.2.3
   checksum: 461e335d17877d8fc54d559dea2d52d6c2a2a27c1a99a796f3181ebf92f62e227f1298c51a6ab0c619d97b127a3ffbfd3e679f8cf6907aed68a1e31fd73d5061
+  languageName: node
+  linkType: hard
+
+"expo-av@npm:~13.10.6":
+  version: 13.10.6
+  resolution: "expo-av@npm:13.10.6"
+  peerDependencies:
+    expo: "*"
+  checksum: 66f4b2e885f574e0815d2340e6ea9aa82b2599f4796fe84a8ca08795f3076c306d6b6983599d7be9c246cdc787f9d682f15f236d295606ef31089c5c6e9f78f4
   languageName: node
   linkType: hard
 

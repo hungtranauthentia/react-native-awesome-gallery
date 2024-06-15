@@ -71,7 +71,7 @@ const defaultRenderImage = ({
   item,
   setImageDimensions,
 }: RenderItemInfo<any>) => {
-  if (item.type !== GalleryItemType.VIDEO)
+  if (item.type !== GalleryMediaType.VIDEO)
     return (
       <Image
         onLoad={(e) => {
@@ -100,13 +100,17 @@ type RenderItem<T> = (
   imageInfo: RenderItemInfo<T>
 ) => React.ReactElement | null;
 
-export enum GalleryItemType {
+export enum GalleryMediaType {
   VIDEO = 'video',
   IMAGE = 'image',
 }
 
-type Props<T> = EventsCallbacks & {
-  item: T & { type: GalleryItemType };
+export type GalleryItemType = {
+  type: GalleryMediaType;
+};
+
+type Props<T extends GalleryItemType> = EventsCallbacks & {
+  item: T;
   index: number;
   active: boolean;
   isFirst: boolean;
@@ -146,7 +150,7 @@ const springConfig = {
 type ItemRef = { reset: (animated: boolean) => void };
 
 const ResizableImage = React.memo(
-  <T extends any>({
+  <T extends GalleryItemType>({
     item,
     active,
     translateX,
@@ -849,7 +853,7 @@ const ResizableImage = React.memo(
       <GestureDetector
         gesture={
           item?.type === 'video'
-            ? Gesture.Race(panGesture, tapGesture)
+            ? Gesture.Race(panGesture)
             : Gesture.Race(
                 Gesture.Simultaneous(
                   longPressGesture,
@@ -876,7 +880,7 @@ export type GalleryRef = {
 
 export type GalleryReactRef = React.Ref<GalleryRef>;
 
-type GalleryProps<T> = EventsCallbacks & {
+type GalleryProps<T extends GalleryItemType> = EventsCallbacks & {
   ref?: GalleryReactRef;
   data: T[];
 
@@ -902,7 +906,7 @@ type GalleryProps<T> = EventsCallbacks & {
   onScaleChangeRange?: { start: number; end: number };
 };
 
-const GalleryComponent = <T extends any>(
+const GalleryComponent = <T extends GalleryItemType>(
   {
     data,
     renderItem = defaultRenderImage,
@@ -1005,16 +1009,13 @@ const GalleryComponent = <T extends any>(
       <Animated.View style={[styles.rowContainer, animatedStyle]}>
         {data.map((item: any, i) => {
           const isFirst = i === 0;
-          const renderCount =
-            item.type === GalleryItemType.VIDEO ? 1 : numToRender;
           const outOfLoopRenderRange =
             !isLoop ||
-            (Math.abs(i - index) < data.length - (renderCount - 1) / 2 &&
-              Math.abs(i - index) > (renderCount - 1) / 2);
+            (Math.abs(i - index) < data.length - (numToRender - 1) / 2 &&
+              Math.abs(i - index) > (numToRender - 1) / 2);
 
           const hidden =
-            Math.abs(i - index) > (renderCount - 1) / 2 && outOfLoopRenderRange;
-          console.log(hidden);
+            Math.abs(i - index) > (numToRender - 1) / 2 && outOfLoopRenderRange;
 
           return (
             <View
@@ -1069,7 +1070,9 @@ const GalleryComponent = <T extends any>(
   );
 };
 
-const Gallery = React.forwardRef(GalleryComponent) as <T extends any>(
+const Gallery = React.forwardRef(GalleryComponent) as <
+  T extends GalleryItemType
+>(
   p: GalleryProps<T> & { ref?: GalleryReactRef }
 ) => React.ReactElement;
 

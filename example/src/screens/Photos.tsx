@@ -1,10 +1,13 @@
 import {
+  NavigationProp,
   RouteProp,
+  useIsFocused,
   useNavigation,
   useRoute,
-  useIsFocused,
-  NavigationProp,
 } from '@react-navigation/native';
+import { ResizeMode, Video } from 'expo-av';
+import { Image } from 'expo-image';
+import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   StatusBar,
@@ -14,12 +17,10 @@ import {
   View,
 } from 'react-native';
 import AwesomeGallery, {
+  GalleryMediaType,
   GalleryRef,
   RenderItemInfo,
 } from 'react-native-awesome-gallery';
-import * as React from 'react';
-import type { NavParams } from '../navigation/types';
-import { Image } from 'expo-image';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -27,11 +28,33 @@ import Animated, {
   FadeOutUp,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { NavParams } from '../navigation/types';
 
 const renderItem = ({
   item,
   setImageDimensions,
-}: RenderItemInfo<{ uri: string }>) => {
+}: RenderItemInfo<{ uri: string; type: GalleryMediaType }>) => {
+  if (item.type === GalleryMediaType.VIDEO) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Video
+          style={[StyleSheet.absoluteFillObject, { bottom: 100 }]}
+          source={{
+            uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
+          }}
+          useNativeControls
+          resizeMode={ResizeMode.CONTAIN}
+          isLooping
+        />
+        <TouchableOpacity
+          onPress={() => {}}
+          style={{ position: 'absolute', top: 300, left: 100 }}
+        >
+          <Text style={{ color: 'white' }}>Buton</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   return (
     <Image
       source={item.uri}
@@ -103,7 +126,10 @@ export const Photos = () => {
       )}
       <AwesomeGallery
         ref={gallery}
-        data={params.images.map((uri) => ({ uri }))}
+        data={params.images.map((uri, index) => ({
+          uri,
+          type: index <= 3 ? GalleryMediaType.VIDEO : GalleryMediaType.IMAGE,
+        }))}
         keyExtractor={(item) => item.uri}
         renderItem={renderItem}
         initialIndex={params.index}
