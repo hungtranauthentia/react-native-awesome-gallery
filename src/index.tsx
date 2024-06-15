@@ -849,7 +849,7 @@ const ResizableImage = React.memo(
       <GestureDetector
         gesture={
           item?.type === 'video'
-            ? Gesture.Race(panGesture, pinchGesture)
+            ? Gesture.Race(panGesture)
             : Gesture.Race(
                 Gesture.Simultaneous(
                   longPressGesture,
