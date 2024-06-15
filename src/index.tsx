@@ -9,32 +9,32 @@ import {
   I18nManager,
   Image,
   StyleSheet,
-  useWindowDimensions,
   View,
   ViewStyle,
+  useWindowDimensions,
 } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-  withDecay,
-  useAnimatedReaction,
-  runOnJS,
-  withSpring,
-  cancelAnimation,
-} from 'react-native-reanimated';
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
+import Animated, {
+  cancelAnimation,
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+  withDecay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useVector } from 'react-native-redash';
 import {
   clamp,
+  resizeImage,
   withDecaySpring,
   withRubberBandClamp,
-  resizeImage,
 } from './utils';
 
 const rtl = I18nManager.isRTL;
@@ -62,6 +62,7 @@ export const snapPoint = (
 
 export type RenderItemInfo<T> = {
   index: number;
+  active: boolean;
   item: T;
   setImageDimensions: (imageDimensions: Dimensions) => void;
 };
@@ -70,17 +71,19 @@ const defaultRenderImage = ({
   item,
   setImageDimensions,
 }: RenderItemInfo<any>) => {
-  return (
-    <Image
-      onLoad={(e) => {
-        const { height: h, width: w } = e.nativeEvent.source;
-        setImageDimensions({ height: h, width: w });
-      }}
-      source={{ uri: item }}
-      resizeMode="contain"
-      style={StyleSheet.absoluteFillObject}
-    />
-  );
+  if (item.type !== GalleryItemType.VIDEO)
+    return (
+      <Image
+        onLoad={(e) => {
+          const { height: h, width: w } = e.nativeEvent.source;
+          setImageDimensions({ height: h, width: w });
+        }}
+        source={{ uri: item }}
+        resizeMode="contain"
+        style={StyleSheet.absoluteFillObject}
+      />
+    );
+  return null;
 };
 
 type EventsCallbacks = {
@@ -97,9 +100,15 @@ type RenderItem<T> = (
   imageInfo: RenderItemInfo<T>
 ) => React.ReactElement | null;
 
+export enum GalleryItemType {
+  VIDEO = 'video',
+  IMAGE = 'image',
+}
+
 type Props<T> = EventsCallbacks & {
-  item: T;
+  item: T & { type: GalleryItemType };
   index: number;
+  active: boolean;
   isFirst: boolean;
   isLast: boolean;
   translateX: Animated.SharedValue<number>;
@@ -139,6 +148,7 @@ type ItemRef = { reset: (animated: boolean) => void };
 const ResizableImage = React.memo(
   <T extends any>({
     item,
+    active,
     translateX,
     index,
     isFirst,
@@ -395,6 +405,7 @@ const ResizableImage = React.memo(
     const itemProps: RenderItemInfo<T> = {
       item,
       index,
+      active,
       setImageDimensions,
     };
 
@@ -836,13 +847,17 @@ const ResizableImage = React.memo(
 
     return (
       <GestureDetector
-        gesture={Gesture.Race(
-          Gesture.Simultaneous(
-            longPressGesture,
-            Gesture.Race(panGesture, pinchGesture)
-          ),
-          Gesture.Exclusive(doubleTapGesture, tapGesture)
-        )}
+        gesture={
+          item?.type === 'video'
+            ? Gesture.Race(panGesture, pinchGesture)
+            : Gesture.Race(
+                Gesture.Simultaneous(
+                  longPressGesture,
+                  Gesture.Race(panGesture, pinchGesture)
+                ),
+                Gesture.Exclusive(doubleTapGesture, tapGesture)
+              )
+        }
       >
         <View style={{ width, height }}>
           <Animated.View style={[{ width, height }, animatedStyle]}>
@@ -1016,6 +1031,7 @@ const GalleryComponent = <T extends any>(
                 // @ts-ignore
                 <ResizableImage
                   {...{
+                    active: index === i,
                     translateX,
                     item,
                     currentIndex,
